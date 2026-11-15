@@ -42,6 +42,107 @@ export default class O2FilterPuzzle {
         g.generateTexture('o2_leaf', 48, 28);
         g.destroy();
     }
+
+
+    createSciencePanel() {
+        // Panel positioned outside the playable leaf area
+        this.addObject(
+            this.scene.add.rectangle(
+                680, 310, 220, 290, 0x0b1725, 0.96
+            ).setStrokeStyle(2, 0x38bdf8),
+            102
+        );
+
+        this.addObject(
+            this.scene.add.text(
+                680, 190,
+                'NASA SCIENCE FILE',
+                {
+                    fontSize: '15px',
+                    color: '#38bdf8',
+                    fontStyle: 'bold'
+                }
+            ).setOrigin(0.5),
+            103
+        );
+
+        this.addObject(
+            this.scene.add.text(
+                680, 220,
+                'MOXIE EXPERIMENT',
+                {
+                    fontSize: '13px',
+                    color: '#ffffff',
+                    fontStyle: 'bold'
+                }
+            ).setOrigin(0.5),
+            103
+        );
+
+        const facts = [
+            ['TOTAL OXYGEN', '122 grams'],
+            ['PEAK PRODUCTION', '12 g/hour'],
+            ['OXYGEN PURITY', '98% or higher'],
+            ['LOCATION', 'Perseverance Rover']
+        ];
+
+        facts.forEach((fact, index) => {
+            const y = 260 + index * 48;
+
+            this.addObject(
+                this.scene.add.text(
+                    590, y,
+                    fact[0],
+                    {
+                        fontSize: '11px',
+                        color: '#94a3b8'
+                    }
+                ),
+                103
+            );
+
+            this.addObject(
+                this.scene.add.text(
+                    590, y + 17,
+                    fact[1],
+                    {
+                        fontSize: '15px',
+                        color: '#4ade80',
+                        fontStyle: 'bold'
+                    }
+                ),
+                103
+            );
+        });
+
+        this.addObject(
+            this.scene.add.text(
+                680, 495,
+                'MOXIE converted CO2\nfrom Mars atmosphere\ninto molecular oxygen.',
+                {
+                    fontSize: '11px',
+                    color: '#cbd5e1',
+                    align: 'center',
+                    lineSpacing: 5
+                }
+            ).setOrigin(0.5),
+            103
+        );
+
+        this.addObject(
+            this.scene.add.text(
+                680, 550,
+                'SOURCE: NASA / JPL\nHISTORICAL MISSION DATA',
+                {
+                    fontSize: '9px',
+                    color: '#64748b',
+                    align: 'center'
+                }
+            ).setOrigin(0.5),
+            103
+        );
+    }
+
     
 
     create() {
@@ -103,6 +204,9 @@ export default class O2FilterPuzzle {
             }).setOrigin(0.5),
             102
         );
+
+
+        this.createSciencePanel();
 
         // Spawn leaves as real Image sprites
         const colors = [0xd97706, 0xea580c, 0x16a34a, 0xdc2626, 0xeab308];

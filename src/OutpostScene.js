@@ -94,13 +94,16 @@ export default class OutpostScene extends Phaser.Scene {
         this.baseRoom = this.add.image(400, 300, 'outpost_bg')
             .setDisplaySize(800, 600);
 
-        this.add.text(796, 598, 'Background generated using AI', {
-            fontSize: '7px',
+        this.add.text(792, 544, 'Background generated using AI', {
+            fontSize: '9px',
             fontFamily: 'monospace',
-            color: '#cbd5e1',
+            color: '#ffffff',
+            fontStyle: 'bold',
+            backgroundColor: '#090d16e6',
+            padding: { x: 4, y: 2 },
             stroke: '#090d16',
             strokeThickness: 1
-        }).setOrigin(1, 1).setAlpha(0.7).setDepth(32);
+        }).setOrigin(1, 1).setDepth(32);
 
         // Title
         this.add.text(28, 18, 'MARS OUTPOST', {
