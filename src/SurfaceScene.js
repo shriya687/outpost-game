@@ -28,6 +28,14 @@ export default class SurfaceScene extends Phaser.Scene {
         // 1. Render the Martian surface background
         this.add.image(400, 300, 'surface-bg').setDisplaySize(800, 600);
 
+        this.add.text(796, 598, 'Background generated using AI', {
+            fontSize: '7px',
+            fontFamily: 'monospace',
+            color: '#cbd5e1',
+            stroke: '#090d16',
+            strokeThickness: 1
+        }).setOrigin(1, 1).setAlpha(0.7).setDepth(32);
+
         // 2. Align Airlock return zone with the ramp in the top-left of the artwork
         this.airlockHatch = { x: 215, y: 175 };
 
