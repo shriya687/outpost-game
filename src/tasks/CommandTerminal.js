@@ -1,3 +1,6 @@
+import {
+    createMarsquakeDashboard
+} from 'C:/Users/Shriya/outpost-game/src/tasks/MarsquakeDatasetPanel.js';
 export default class CommandTerminal {
 
     constructor(scene, onClose) {
@@ -8,6 +11,9 @@ export default class CommandTerminal {
         this.detailObjects = [];
         this.closed = false;
         this.inDetailView = false;
+        this.marsquakeDashboard = null;
+        this.marsquakeAbortController = null;
+        this.dashboardRequestId = 0;
 
         this.create();
     }
@@ -23,6 +29,30 @@ export default class CommandTerminal {
         this.detailObjects.push(object);
         return object;
     }
+
+    cleanupMarsquakeDashboard() {
+    // Invalidate any previous asynchronous dashboard operation
+    this.dashboardRequestId++;
+
+    // Abort an unfinished catalogue request
+    if (this.marsquakeAbortController) {
+        this.marsquakeAbortController.abort();
+        this.marsquakeAbortController = null;
+    }
+
+    // Destroy the previous dashboard
+    if (this.marsquakeDashboard) {
+        if (typeof this.marsquakeDashboard === 'function') {
+            this.marsquakeDashboard();
+        } else if (
+            typeof this.marsquakeDashboard.destroy === 'function'
+        ) {
+            this.marsquakeDashboard.destroy();
+        }
+
+        this.marsquakeDashboard = null;
+    }
+}
 
     create() {
         // 1. Dark backdrop overlay
@@ -144,8 +174,10 @@ export default class CommandTerminal {
                         headline: '1,319 MARSQUAKES RECORDED',
                         neilNote: 'InSight’s SEIS instrument was sensitive enough to detect vibrations smaller than a hydrogen atom!',
                         body: "NASA's InSight lander used a highly sensitive instrument called the Seismic Experiment for Interior Structure (SEIS) to measure ground vibrations.\n\n• InSight recorded 1,319 marsquakes during its mission.",
-                        art: 'quake_wave'
-                    },
+                        art: 'quake_wave',
+                        dataset: true
+                        },
+                    
                     {
                         subtitle: '2021 Impact & Deep Interior',
                         headline: 'CRUST, MANTLE & CORE',
@@ -380,18 +412,83 @@ export default class CommandTerminal {
         );
         // Render Slide Helper
         const renderSlide = (idx) => {
-            const slide = card.slides[idx];
-            subtitleText.setText(slide.subtitle);
-            neilDialogueText.setText(slide.neilNote);
-            cardHeadline.setText(slide.headline);
-            cardBodyText.setText(slide.body);
-            pageCounter.setText(`Slide ${idx + 1} of ${card.slides.length}`);
-            slideGraphics.clear();
-            this.drawSlideArt(slideGraphics, 400, 268, slide.art);
-            // Style Back/Next availability
-            backLabel.setAlpha(idx > 0 ? 1 : 0.4);
-            nextLabel.setText(idx < card.slides.length - 1 ? 'Next ->' : 'Done ✓');
-        };
+    const slide = card.slides[idx];
+
+    // Remove any dashboard from the previous slide
+    this.cleanupMarsquakeDashboard();
+
+    // Update slide information
+    subtitleText.setText(slide.subtitle);
+    neilDialogueText.setText(slide.neilNote);
+
+    pageCounter.setText(
+        `Slide ${idx + 1} of ${card.slides.length}`
+    );
+
+    // Clear previous illustration
+    slideGraphics.clear();
+
+    if (slide.dataset === true) {
+
+        // Hide ordinary content on the dataset slide
+        cardHeadline.setVisible(false);
+        cardBodyText.setVisible(false);
+        slideGraphics.setVisible(false);
+
+        // Create a new request controller
+        const controller = new AbortController();
+
+        this.marsquakeAbortController = controller;
+
+        const requestId = ++this.dashboardRequestId;
+
+        try {
+            const dashboard = createMarsquakeDashboard(
+                this.scene,
+                {
+                    x: 170,
+                    y: 205,
+                    width: 460,
+                    height: 238,
+                    signal: controller.signal
+                }
+            );
+
+            this.marsquakeDashboard = dashboard;
+
+} catch (error) {
+    console.error(
+        'Unable to create Marsquake dashboard:',
+        error
+    );
+}
+    } else {
+
+        // Restore normal slide content
+        cardHeadline.setVisible(true);
+        cardBodyText.setVisible(true);
+        slideGraphics.setVisible(true);
+
+        cardHeadline.setText(slide.headline);
+        cardBodyText.setText(slide.body);
+
+        this.drawSlideArt(
+            slideGraphics,
+            400,
+            268,
+            slide.art
+        );
+    }
+
+    // Update navigation controls
+    backLabel.setAlpha(idx > 0 ? 1 : 0.4);
+
+    nextLabel.setText(
+        idx < card.slides.length - 1
+            ? 'Next ->'
+            : 'Done ✓'
+    );
+};
         backBtn.on('pointerdown', () => {
             if (currentSlide > 0) {
                 currentSlide--;
@@ -410,16 +507,26 @@ export default class CommandTerminal {
     }
 
     closeDetailPopup() {
-        this.inDetailView = false;
-        if (this.detailBobTween) {
-            this.detailBobTween.stop();
-            this.detailBobTween = null;
-        }
-        this.detailObjects.forEach(obj => {
-            if (obj && obj.destroy) obj.destroy();
-        });
-        this.detailObjects = [];
+    this.inDetailView = false;
+
+    // Cancel pending requests and remove dashboard
+    this.cleanupMarsquakeDashboard();
+
+    // Stop astronaut animation
+    if (this.detailBobTween) {
+        this.detailBobTween.stop();
+        this.detailBobTween = null;
     }
+
+    // Destroy popup objects
+    this.detailObjects.forEach(obj => {
+        if (obj && obj.destroy) {
+            obj.destroy();
+        }
+    });
+
+    this.detailObjects = [];
+}
 
     // Draws compact pixel art inside the parchment slide card
     drawSlideArt(g, cx, cy, artType) {
