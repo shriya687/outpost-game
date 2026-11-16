@@ -1,6 +1,6 @@
 import {
     createMarsquakeDashboard
-} from 'C:/Users/Shriya/outpost-game/src/tasks/MarsquakeDatasetPanel.js';
+} from './MarsquakeDatasetPanel.js';
 export default class CommandTerminal {
 
     constructor(scene, onClose) {
